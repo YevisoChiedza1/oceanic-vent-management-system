@@ -28,27 +28,70 @@ if (!$vent) {
     exit;
 }
 
+// Fetch fauna associated with this vent
+$stmtFauna = $pdo->prepare(
+    'SELECT f.name, f.scientific_name 
+     FROM fauna f
+     JOIN vents v ON f.vent_id = v.id
+     WHERE v.id = ?'
+);
+$stmtFauna->execute([$ventId]);
+$fauna = $stmtFauna->fetchAll();
+
+
+
 $pageTitle = $vent['name'];
 
 require_once 'includes/header.php';
 ?>
 
-<p><a href="index.php">&larr; Back to all vents</a></p>
+<div class="vent-container">
 
-<h2><?php echo e($vent['name']); ?></h2>
+    <p class="back-link"><a href="index.php">&larr; Back to all vents</a></p>
 
-<dl>
-    <dt>Location</dt>
-    <dd><?php echo e($vent['location']); ?></dd>
+    <div class="vent-card">
+        <h2><?php echo e($vent['name']); ?></h2>
 
-    <dt>Type</dt>
-    <dd><?php echo e($vent['type']); ?></dd>
+        <dl class="vent-details">
+            <div>
+                <dt>Location</dt>
+                <dd><?php echo e($vent['location']); ?></dd>
+            </div>
 
-    <dt>Depth</dt>
-    <dd><?php echo e($vent['depth_metres']); ?> metres</dd>
+            <div>
+                <dt>Type</dt>
+                <dd><?php echo e($vent['type']); ?></dd>
+            </div>
 
-    <dt>Discovery Year</dt>
-    <dd><?php echo e($vent['discovery_year']); ?></dd>
-</dl>
+            <div>
+                <dt>Depth</dt>
+                <dd><?php echo e($vent['depth_metres']); ?> metres</dd>
+            </div>
+
+            <div>
+                <dt>Discovery Year</dt>
+                <dd><?php echo e($vent['discovery_year']); ?></dd>
+            </div>
+        </dl>
+    </div>
+
+    <div class="fauna-card">
+        <h3>Associated Fauna</h3>
+
+        <?php if (empty($fauna)): ?>
+            <p>No fauna recorded for this vent.</p>
+        <?php else: ?>
+            <ul class="fauna-list">
+                <?php foreach ($fauna as $creature): ?>
+                    <li>
+                        <strong><?php echo e($creature['name']); ?></strong><br>
+                        <span><?php echo e($creature['scientific_name']); ?></span>
+                    </li>
+                <?php endforeach; ?>
+            </ul>
+        <?php endif; ?>
+    </div>
+
+</div>
 
 <?php require_once 'includes/footer.php'; ?>
